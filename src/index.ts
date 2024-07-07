@@ -28,12 +28,20 @@ app.post("/signup", async(req,res)=>{
   if(!success){
     return res.status(401).json({message: "invalid creadentials"})
   }
+  const userAlready = await prisma.user.findMany({
+    where:{
+      email: body.email
+    }
+  }) 
+  if(userAlready[0]){
+    return res.status(401).json({message:"email already in use"});
+  }
   try {
     await prisma.user.create({
       data:{
         email: body.email,
         name: body.name,
-        password: body.name
+        password: body.password
       }
     })
     return res.status(200).json({message: "user created"});
@@ -69,5 +77,5 @@ app.get("/signin",async(req,res)=>{
   }
 });
 
-app.listen(3000, ()=>{console.log("listning on port 3000");
+app.listen(3000, ()=>{console.log("listning on http://localhost:3000");
 });
