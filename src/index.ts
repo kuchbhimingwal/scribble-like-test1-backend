@@ -69,5 +69,5 @@ app.get("/signin",async(req,res)=>{
   }
 });
 
-app.listen(3000), ()=>{console.log("listning on port 3000");
-};
+app.listen(3000, ()=>{console.log("listning on port 3000");
+});
