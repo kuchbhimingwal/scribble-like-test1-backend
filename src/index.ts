@@ -3,6 +3,7 @@ import cors from "cors"
 import z from "zod"
 import jwt from "jsonwebtoken"
 import authMiddelware from './middleware'
+import WebSocket, { WebSocketServer } from 'ws';
 
 import { PrismaClient } from '@prisma/client'
 
@@ -77,5 +78,28 @@ app.get("/signin",async(req,res)=>{
   }
 });
 
-app.listen(3000, ()=>{console.log("listning on http://localhost:3000");
+const httpServer = app.listen(3000, ()=>{console.log("listning on http://localhost:3000");
+});
+
+
+const wss = new WebSocketServer({ server: httpServer });
+let connectedSockets = [];
+let connectedUsers = [];
+wss.on('connection', function connection(ws) {
+  ws.on('error', console.error);
+
+  ws.on('message', function message(data:any) {
+    const message = JSON.parse(data);
+    if (message.type === 'connect') {
+      connectedSockets.push(ws);
+      connectedUsers.push(message.userId);
+      if(connectedSockets[0]){
+        connectedSockets.forEach((connectedsocket)=>{
+          connectedsocket?.send(JSON.stringify({ users :  connectedUsers}));
+        })
+      }
+    }
+  });
+
+  ws.send('Hello! Message From Server!!');
 });
